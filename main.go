@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"gfey"
 	"net/http"
 )
@@ -9,14 +8,20 @@ import (
 func main() {
 	r := gfey.New()
 
-	r.GET("/", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "URL.Path = %q\n", req.URL.Path)
+	r.GET("/", func(ctx *gfey.Context) {
+		ctx.HTML(http.StatusOK, "<h1>index</h1>")
 	})
 
-	r.GET("/hello", func(w http.ResponseWriter, req *http.Request) {
-		for k, v := range req.Header {
-			fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
-		}
+	r.GET("/news", func(ctx *gfey.Context) {
+		// url example: /news?title=TimesNews&content=ConferencesStart
+		ctx.String(http.StatusOK, "title:%s\ncontent:%s\n", ctx.Query("title"), ctx.Query("content"))
+	})
+
+	r.POST("/login", func(ctx *gfey.Context) {
+		ctx.Json(http.StatusOK, gfey.H{
+			"username": ctx.PostForm("username"),
+			"password": ctx.PostForm("password"),
+		})
 	})
 
 	r.Run(":9999")
