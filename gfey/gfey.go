@@ -19,7 +19,7 @@ func New() *Engine {
 
 // AddRoute 用于向路由表中添加路由
 func (engine *Engine) AddRoute(method string, pattern string, handler HandlerFunc) {
-	engine.router.AddRoute(method, pattern, handler)
+	engine.router.addRoute(method, pattern, handler)
 }
 
 // GET 用于添加 HTTP 的 GET 请求

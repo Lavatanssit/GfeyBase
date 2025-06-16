@@ -24,5 +24,17 @@ func main() {
 		})
 	})
 
+	r.GET("/news/:date", func(ctx *gfey.Context) {
+		ctx.String(http.StatusOK, "news in date %v\n", ctx.Param("date"))
+	})
+
+	r.GET("/news/:date/*newsName", func(ctx *gfey.Context) {
+		ctx.String(http.StatusOK, "news in date %v\n", ctx.Param("date"))
+		ctx.Json(http.StatusOK, gfey.H{
+			"date":     ctx.Param("date"),
+			"newsName": ctx.Param("newsName"),
+		})
+	})
+
 	r.Run(":9999")
 }
