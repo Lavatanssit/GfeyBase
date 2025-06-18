@@ -3,9 +3,10 @@ package gfey
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
-// HandlerFunc 定义所有的请求处理函数 参数是 writer 和 *request
+// HandlerFunc 定义所有的请求处理函数 参数是 *Context
 type HandlerFunc func(*Context)
 
 // Engine 实现了 ServeHTTP 接口
@@ -61,6 +62,10 @@ func (group *RouterGroup) POST(pattern string, handler HandlerFunc) {
 	group.AddRoute("POST", pattern, handler)
 }
 
+func (group *RouterGroup) Use(middlewares ...HandlerFunc) {
+	group.middlewares = append(group.middlewares, middlewares...)
+}
+
 // Run 用于运行 http 服务器，调用标准库 ListenAndServe 方法
 func (engine *Engine) Run(address string) (err error) {
 	return http.ListenAndServe(address, engine)
@@ -68,6 +73,14 @@ func (engine *Engine) Run(address string) (err error) {
 
 // Engine 实现标准库的 ServeHTTP 接口
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	// 给对应分组增加中间件
+	var middlewares []HandlerFunc
+	for _, group := range engine.groups {
+		if strings.HasPrefix(req.URL.Path, group.prefix) {
+			middlewares = append(middlewares, group.middlewares...)
+		}
+	}
 	c := NewContext(w, req)
+	c.handlers = middlewares
 	engine.router.Handle(c)
 }

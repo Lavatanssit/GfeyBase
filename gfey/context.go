@@ -19,6 +19,9 @@ type Context struct {
 	Params map[string]string
 	// 响应信息字段
 	StatusCode int
+	// 中间件字段
+	handlers []HandlerFunc
+	index    int
 }
 
 // NewContext: 构造Context，返回指向新Context实例的指针
@@ -29,6 +32,7 @@ func NewContext(w http.ResponseWriter, req *http.Request) *Context {
 		Path:       req.URL.Path,
 		Method:     req.Method,
 		StatusCode: 0,
+		index:      -1,
 	}
 }
 
@@ -83,7 +87,17 @@ func (c *Context) HTML(code int, html string) {
 	c.Writer.Write([]byte(html))
 }
 
+// Param: 根据key，提取URL路径中的参数
 func (c *Context) Param(key string) string {
 	value := c.Params[key]
 	return value
+}
+
+// Next: 链式执行中间件handlers
+func (c *Context) Next() {
+	c.index++
+	s := len(c.handlers)
+	for ; c.index < s; c.index++ {
+		c.handlers[c.index](c)
+	}
 }
