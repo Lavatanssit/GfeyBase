@@ -1,0 +1,23 @@
+div {
+    /* 字体颜色 */
+    color : green;
+    /* 字体大小 */
+    font-size: 20px;
+    /* 行高 */
+    line-height: 40px;
+    /* 字体加粗 */
+    font-weight: bold;
+    /* 字体格式：楷体 */
+    font-family: Kai,serif;
+}
+a {
+    /* 倾斜 */
+    font-style: italic;
+    /* 隐藏下划线 */
+    text-decoration: none;
+}
+p {
+    color: orange;
+    font-weight: 700;
+    font-size: 20px;
+}

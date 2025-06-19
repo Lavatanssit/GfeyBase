@@ -22,6 +22,8 @@ type Context struct {
 	// 中间件字段
 	handlers []HandlerFunc
 	index    int
+	// engine字段：用于访问engine加载的html模板
+	engine *Engine
 }
 
 // NewContext: 构造Context，返回指向新Context实例的指针
@@ -80,11 +82,20 @@ func (c *Context) Data(code int, data []byte) {
 	c.Writer.Write(data)
 }
 
-// HTML: 构造HTML响应的方法，向writer中写入string类型的html页面
-func (c *Context) HTML(code int, html string) {
+// HTML: 构造HTML响应的方法，渲染模板并输出到响应。
+// name: 模板文件名，data: 传递给模板的数据。
+// 若渲染失败，返回 500 错误。
+func (c *Context) HTML(code int, name string, data interface{}) {
 	c.SetHeader("Content-Type", "text/html")
 	c.Status(code)
-	c.Writer.Write([]byte(html))
+	if err := c.engine.htmlTemplates.ExecuteTemplate(c.Writer, name, data); err != nil {
+		c.Fail(500, err.Error())
+	}
+}
+
+func (c *Context) Fail(code int, err string) {
+	c.index = len(c.handlers)
+	c.Json(code, H{"message": err})
 }
 
 // Param: 根据key，提取URL路径中的参数
